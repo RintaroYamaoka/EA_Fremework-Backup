@@ -2,7 +2,7 @@ from pathlib import Path
 
 # Pathクラスインスタンス作成
 SOURCE_DIR = Path(r"C:\Users\rintaroyamaoka\AppData\Roaming\MetaQuotes\Terminal\C4171FD2B38378D6406D5C84412B5F20\MQL5\Experts\MyEA")
-DEST_DIR   = Path(r"C:\Users\rintaroyamaoka\Documents\MyProjects\MT5toGit\MyEA_BackupUTF-8")
+DEST_DIR   = Path(r"C:\Users\rintaroyamaoka\Documents\MyProjects\MT5Projects\MyEA_BackupUTF-8")
 
 # 対象拡張子
 TARGET_EXTENSIONS = [".mq5", ".mqh"]

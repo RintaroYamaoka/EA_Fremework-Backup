@@ -56,6 +56,11 @@ double C_LotSize::GetLotSize(double sl_points, RISK_MODE mode = MODE_STATIC)
     }     
     else 
     {
+        signal = sig;
+    }
+
+    void OnTickMethod() override
+
         balance  = AccountInfoDouble(ACCOUNT_BALANCE);
         mode_log = "MODE_DYNAMIC";
     }    

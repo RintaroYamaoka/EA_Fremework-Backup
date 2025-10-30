@@ -6,8 +6,9 @@
 #property copyright "RintaroYamaoka"
 #property link      "https://www.instagram.com/void0ntrick/?locale=ja_JP"
 
+// MyTradeModules最終アップデート 2025/10/30
 //+------------------------------------------------------------------+
-// EAFrameクラス
+// EAFrameクラス(継承元)
 //+------------------------------------------------------------------+
 class C_EAFrame
 {

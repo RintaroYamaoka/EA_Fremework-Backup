@@ -14,8 +14,8 @@ class C_Position
 public:
     struct POSITION
     {
-        ulong  ticket;
-        bool   is_long;
+        ulong ticket;
+        bool is_long;
         double lot;
         double price;
         double sl;
@@ -27,7 +27,7 @@ public:
     int CopyStArray(POSITION &st[]);
 
 private:
-    ulong  magic;
+    ulong magic;
     string sym;
     POSITION pos[]; 
     

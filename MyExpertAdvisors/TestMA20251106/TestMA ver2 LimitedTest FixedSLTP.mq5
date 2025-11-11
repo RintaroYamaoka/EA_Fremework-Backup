@@ -1,5 +1,5 @@
 //+------------------------------------------------------------------+
-//|                            TestMA ver2 LimitedTest FixedSLTP.mq5 |
+//|                                                  TestMA ver2.mq5 |
 //|                                                   RintaroYamaoka |
 //|              https://www.instagram.com/void0ntrick/?locale=ja_JP |
 //+------------------------------------------------------------------+

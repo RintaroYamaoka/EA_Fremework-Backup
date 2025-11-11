@@ -15,9 +15,9 @@ public:
     C_Order(ulong magic_no,int slipage,string symbol);
                             
     void Entry(bool in_long,double lot,double sl_points,double tp_points);
-    void Close(int ticket); 
+    void Close(ulong ticket);
+    void ModifySLTP(ulong ticket, double sl, double tp); 
     
-
 private:
     ulong magic;                          // マジックナンバー
     int   slip;                           // 許容スリッページ
@@ -90,6 +90,7 @@ void C_Order::Entry(bool in_long,double lot,double sl_points,double tp_points)
             PrintFormat("警告　%s stop_level < 0.", __FUNCTION__);
             stop_level = 0;
         }
+        
         else if(stop_level > 0)
         {
             if(sl_points > 0 && sl_points < stop_level)
@@ -124,7 +125,7 @@ void C_Order::Entry(bool in_long,double lot,double sl_points,double tp_points)
 
 //+------------------------------------------------------------------+
 // ポジション決済
-void C_Order::Close(int ticket)
+void C_Order::Close(ulong ticket)
 {   
     // ポジション選択と整合性チェック 
     if(!PositionSelectByTicket(ticket))
@@ -167,6 +168,80 @@ void C_Order::Close(int ticket)
     }
      
     _Order(request,result);
+}
+
+//+------------------------------------------------------------------+
+// ポジションのSLTP変更
+void C_Order::ModifySLTP(ulong ticket, double sl_price, double tp_price)
+{
+    // ポジション選択と整合性チェック
+    if(!PositionSelectByTicket(ticket))
+    {
+        PrintFormat("警告 %s 不明なticket:%d errorcode=%d", __FUNCTION__, ticket, GetLastError());
+        ResetLastError();
+        return;
+    }
+    
+    if(sym != PositionGetString(POSITION_SYMBOL) || magic != PositionGetInteger(POSITION_MAGIC))   
+    {    
+        PrintFormat("警告 %s 不明なポジション ticket=%d", __FUNCTION__, ticket);
+        return;
+    }
+    
+    // ブローカーが定める最小SL,TP幅(points)を取得
+    int stop_level = (int)SymbolInfoInteger(sym, SYMBOL_TRADE_STOPS_LEVEL);
+    if(stop_level < 0)
+    {
+        PrintFormat("警告　%s stop_level < 0.", __FUNCTION__);
+        stop_level = 0;
+    }
+    
+    // 現在価格・ティック情報取得
+    double bid    = SymbolInfoDouble(sym, SYMBOL_BID);
+    double ask    = SymbolInfoDouble(sym, SYMBOL_ASK);
+    double point  = SymbolInfoDouble(sym, SYMBOL_POINT);
+    int    digits = (int)SymbolInfoInteger(sym, SYMBOL_DIGITS);
+    
+    ENUM_POSITION_TYPE type = (ENUM_POSITION_TYPE)PositionGetInteger(POSITION_TYPE);
+
+    if(stop_level > 0)
+    {
+        double min_dist = stop_level * point;
+        double mkt_price = (type == POSITION_TYPE_BUY ? bid : ask);
+        
+        if(sl_price != 0.0 && MathAbs(mkt_price - sl_price) < min_dist)
+        {
+            PrintFormat("警告 %s SLが最小距離(%dpt)未満 ticket=%d", __FUNCTION__, stop_level, ticket);
+            return;
+        }
+        if(tp_price != 0.0 && MathAbs(mkt_price - tp_price) < min_dist)
+        {
+            PrintFormat("警告 %s TPが最小距離(%dpt)未満 ticket=%d", __FUNCTION__, stop_level, ticket);
+            return;
+        }
+    }
+    
+    if(sl_price != 0.0)
+        sl_price = NormalizeDouble(sl_price, digits);
+    if(tp_price != 0.0)
+        tp_price = NormalizeDouble(tp_price, digits);
+    
+    // 注文リクエスト準備（SL/TP変更専用）
+    MqlTradeRequest request = {};
+    MqlTradeResult  result  = {};
+
+    request.action = TRADE_ACTION_SLTP;    // SL/TP変更
+    request.position = ticket;             // ポジションチケット
+    request.symbol = sym;                  // シンボル
+    request.magic = magic;                 // MagicNumber
+    request.sl = sl_price;                 // 新SL（0なら変更しない）
+    request.tp = tp_price;                 // 新TP（0なら変更しない）    
+    
+    // TRADE_ACTION_SLTPでは無視されるが、統一のため
+    request.deviation   = slip;
+    request.type_filling = fill_type;
+
+    _Order(request, result);    
 }
 
 //+------------------------------------------------------------------+

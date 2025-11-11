@@ -6,7 +6,9 @@
 #property copyright "RintaroYamaoka"
 #property link      "https://www.instagram.com/void0ntrick/?locale=ja_JP"
 
-// MyTradeModules最終アップデート 2025/11/09
+// MyTradeModulesアップデート 2025/11/09
+// 行動状態クラス、エントリーフィルタークラスを追加し、状態遷移方式の設計に変更。
+// OrderModuleにModyfySLTP追加 Closeの第1引数ticketの型をintからulongに変更。 2025/11/11
 //+------------------------------------------------------------------+
 // EAFrameクラス(継承元)
 //+------------------------------------------------------------------+

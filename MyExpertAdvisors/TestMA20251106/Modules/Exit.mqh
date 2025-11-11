@@ -53,7 +53,7 @@ public:
         int n = pos.CopyStArray(p);
         if(n < 0) return;
         
-        order.Close((int)p[0].ticket);
+        order.Close(p[0].ticket);
         Print("Exit: 反対シグナルで決済");
     }
 };

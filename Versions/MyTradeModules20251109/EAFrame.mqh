@@ -9,6 +9,7 @@
 // MyTradeModulesアップデート 2025/11/09
 // 行動状態クラス、エントリーフィルタークラスを追加し、状態遷移方式の設計に変更。
 // OrderModuleにModyfySLTP追加 Closeの第1引数ticketの型をintからulongに変更。 2025/11/11
+// EAFrame class C_ActionBase に void Process() を追加 2025//11/13
 //+------------------------------------------------------------------+
 // EAFrameクラス(継承元)
 //+------------------------------------------------------------------+
@@ -36,9 +37,8 @@ protected:
 class C_ActionBase
 {
 public:
-    virtual bool Check() = 0;    // 条件判定
-    virtual void Execute() = 0;  // 実行処理
-    virtual string Name() { return "Action"; }
+    virtual void Process() = 0;   
+    virtual string Name() { return "Action"; }  
 };
 
 class C_BuyBase : public C_ActionBase

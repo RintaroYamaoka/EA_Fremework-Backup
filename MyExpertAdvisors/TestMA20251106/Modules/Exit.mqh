@@ -31,7 +31,13 @@ public:
     }
     
     
-    bool Check() override            
+    void Process() override
+    {
+        if(_Check()) _Execute();    
+    }
+    
+    
+    bool _Check()           
     {
         C_Position::POSITION p[];
         if(pos.CopyStArray(p) <= 0) return false;
@@ -47,7 +53,7 @@ public:
     }
     
     
-    void Execute() override
+    void _Execute()
     {
         C_Position::POSITION p[];
         int n = pos.CopyStArray(p);

@@ -1,5 +1,5 @@
 //+------------------------------------------------------------------+
-//|                            TestMA ver2 LimitedTest FixedSLTP.mq5 |
+//|                                                  TestMA ver2.mq5 |
 //|                                                   RintaroYamaoka |
 //|              https://www.instagram.com/void0ntrick/?locale=ja_JP |
 //+------------------------------------------------------------------+
@@ -7,8 +7,10 @@
 #property link      "https://www.instagram.com/void0ntrick/?locale=ja_JP"
 #property version   "2.00"
 
+#include "..\\..\\Versions\\MyTradeModules20251109\\EAFrame.mqh"
 #include "Modules\\Frame.mqh"
 
+// ポインタ宣言
 C_Frame *ea = NULL;
 
 //+------------------------------------------------------------------+

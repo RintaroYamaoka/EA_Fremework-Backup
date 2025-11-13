@@ -28,7 +28,13 @@ public:
     }
     
     
-    bool Check() override
+    void Process() override
+    {
+        if(_Check()) _Execute();    
+    }
+    
+    
+    bool _Check()
     {
         if(!filter.CheckAll()) return false;
         
@@ -43,7 +49,7 @@ public:
     }
     
     
-    void Execute() override
+    void _Execute()
     {
         order.Entry(true, lot, Fixed_SLTP, Fixed_SLTP);
         Print("Buy Execute: SMA上抜け");

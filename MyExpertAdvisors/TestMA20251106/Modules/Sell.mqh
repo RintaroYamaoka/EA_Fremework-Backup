@@ -10,7 +10,7 @@
 #include "..\\..\\..\\Versions\\MyTradeModules20251109\\OrderModule.mqh"
 #include "..\\..\\..\\Versions\\MyTradeModules20251109\\SignalModule.mqh"
 
-#include "Parameter.mqh"
+
 
 class C_Sell : public C_SellBase
 {
@@ -28,7 +28,13 @@ public:
     }
     
     
-    bool Check() override
+    void Process() override
+    {
+        if(_Check()) _Execute();    
+    }
+    
+    
+    bool _Check()
     {
         if(!filter.CheckAll()) return false;
         
@@ -43,9 +49,9 @@ public:
     }
     
     
-    void Execute() override
+    void _Execute()
     {
-        order.Entry(false, lot, Fixed_SLTP, Fixed_SLTP);
+        order.Entry(false, lot, 0, 0);
         Print("Sell Execute: SMA下抜け");
     }              
 };

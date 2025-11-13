@@ -14,14 +14,15 @@
 #include "Sell.mqh"
 #include "Exit.mqh"
 
+// EAフレーム
 class C_Frame : public C_EAFrame
 {
-private:
+protected:
     C_Order order;
     C_Position position;
     C_BarData bar;
-    C_Indicator *ma;
     
+    C_Indicator *ma;
     C_FilterBase *filter;
     C_BuyBase *buy;
     C_SellBase *sell;
@@ -71,10 +72,12 @@ public:
         if(current.time == last_time) return;
         last_time = current.time;
         
-        if(exit.Check()) exit.Execute();
+        exit.Process();
         C_Position::POSITION p[];
         if(position.CopyStArray(p) > 0) return;
-        if(buy.Check()) buy.Execute();
-        if(sell.Check()) sell.Execute();
+        buy.Process();
+        sell.Process();
     }            
 };
+
+

@@ -1,5 +1,5 @@
 //+------------------------------------------------------------------+
-//|                            TestMA ver2 LimitedTest FixedBars.mq5 |
+//|                        TestMA ver2 LimitedTest BreakoutEntry.mq5 |
 //|                                                   RintaroYamaoka |
 //|              https://www.instagram.com/void0ntrick/?locale=ja_JP |
 //+------------------------------------------------------------------+
@@ -7,32 +7,34 @@
 #property link      "https://www.instagram.com/void0ntrick/?locale=ja_JP"
 #property version   "2.00"
 
-#include "..\\..\\Versions\\TestModules20251109\\LimitedTest_FixedBarsClose.mqh"
 #include "Modules\\Frame.mqh"
+#include "..\\..\\Versions\\TestModules20251109\\LimitedTest_BreakoutEntry.mqh"
 
-class C_Frame_LimitedFixedBars : public C_Frame
+class C_Frame_BreakoutEntry : public C_Frame
 {
 public:
-    C_Frame_LimitedFixedBars(ulong magic_no, string symbol, ENUM_TIMEFRAMES time_frame,
-                             int slippage, double lot, int ma_period)
+    C_Frame_BreakoutEntry(ulong magic_no, string symbol, ENUM_TIMEFRAMES time_frame,
+                          int slippage, double lot, int ma_period)
         : C_Frame(magic_no, symbol, time_frame, slippage, lot, ma_period)
     {
-        // 親クラスで生成されたexitを差し替え
-        if(exit != NULL) delete exit;
-        exit = new C_ExitFixedBars(&order, &position, symbol, time_frame);
+        // 親クラスで生成されたEntryを差し替え
+        if(buy != NULL) delete buy;
+        buy = new C_BreakoutBuy(&order, &bar, &position, sym, period);
+        if(sell != NULL) delete sell;
+        sell = new C_BreakoutSell(&order, &bar, &position, sym, period);
     }    
 };
 
 // ポインタ宣言
-C_Frame_LimitedFixedBars *ea = NULL;
+C_Frame_BreakoutEntry *ea = NULL;
 
 //+------------------------------------------------------------------+
 //| Expert initialization function                                   |
 //+------------------------------------------------------------------+
 int OnInit()
 {
-   ea = new C_Frame_LimitedFixedBars(MagicNo, _Symbol, Timeframe, Slippage, LotSize, MAPeriod);
-   Print("TestMA ver2 LimitedFixedBars Initialized.");                 
+   ea = new C_Frame_BreakoutEntry(MagicNo, _Symbol, Timeframe, Slippage, LotSize, MAPeriod);
+   Print("TestMA ver2 LimitedTest BreakoutEntry Initialized.");                 
    return(INIT_SUCCEEDED);
 }
 //+------------------------------------------------------------------+
@@ -43,7 +45,7 @@ void OnDeinit(const int reason)
     if(ea != NULL)
     {
         delete ea;
-        Print("TestEA ver2 LimitedFixedBars Deinitialized.");
+        Print("TestEA ver2 LimitedTest BreakoutEntry Deinitialized.");
     }
 }
 //+------------------------------------------------------------------+

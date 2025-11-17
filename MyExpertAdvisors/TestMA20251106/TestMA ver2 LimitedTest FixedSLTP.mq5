@@ -7,7 +7,7 @@
 #property link      "https://www.instagram.com/void0ntrick/?locale=ja_JP"
 #property version   "2.00"
 
-#include "..\\..\\Versions\\TestModules20251109\\LimitedTest_FixedSLTP.mqh"
+#include "..\\..\\Versions\\TestModules20251109\\LimitedTest_FixedSLTPClose.mqh"
 #include "Modules\\Frame.mqh"
 
 class C_Frame_LimitedFixedSLTP : public C_Frame

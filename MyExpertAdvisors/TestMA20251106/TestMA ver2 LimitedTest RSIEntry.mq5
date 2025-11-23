@@ -1,5 +1,5 @@
 //+------------------------------------------------------------------+
-//|                        TestMA ver2 LimitedTest BreakoutEntry.mq5 |
+//|                             TestMA ver2 LimitedTest RSIEntry.mq5 |
 //|                                                   RintaroYamaoka |
 //|              https://www.instagram.com/void0ntrick/?locale=ja_JP |
 //+------------------------------------------------------------------+
@@ -8,32 +8,32 @@
 #property version   "2.00"
 
 #include "Modules\\Frame.mqh"
-#include "..\\..\\Versions\\TestModules20251109\\LimitedTest_BreakoutEntry.mqh"
+#include "..\\..\\Versions\\TestModules20251109\\LimitedTest_RSIEntry.mqh"
 
-class C_Frame_BreakoutEntry : public C_Frame
+class C_Frame_RSIEntry : public C_Frame
 {
 public:
-    C_Frame_BreakoutEntry(ulong magic_no, string symbol, ENUM_TIMEFRAMES time_frame,
+    C_Frame_RSIEntry(ulong magic_no, string symbol, ENUM_TIMEFRAMES time_frame,
                           int slippage, double lot, int ma_period)
         : C_Frame(magic_no, symbol, time_frame, slippage, lot, ma_period)
     {
         // 親クラスで生成されたEntryを差し替え
         if(buy != NULL) delete buy;
-        buy = new C_BreakoutBuy(&order, &position, &bar, sym, period);
+        buy = new C_RSIBuy(&order, &position, &bar, sym, period);
         if(sell != NULL) delete sell;
-        sell = new C_BreakoutSell(&order, &position, &bar, sym, period);
+        sell = new C_RSISell(&order, &position, &bar, sym, period);
     }    
 };
 
 // ポインタ宣言
-C_Frame_BreakoutEntry *ea = NULL;
+C_Frame_RSIEntry *ea = NULL;
 
 //+------------------------------------------------------------------+
 //| Expert initialization function                                   |
 //+------------------------------------------------------------------+
 int OnInit()
 {
-   ea = new C_Frame_BreakoutEntry(MagicNo, _Symbol, Timeframe, Slippage, LotSize, MAPeriod);
+   ea = new C_Frame_RSIEntry(MagicNo, _Symbol, Timeframe, Slippage, LotSize, MAPeriod);
    Print("TestMA ver2 LimitedTest BreakoutEntry Initialized.");                 
    return(INIT_SUCCEEDED);
 }

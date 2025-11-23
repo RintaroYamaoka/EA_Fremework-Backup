@@ -1,5 +1,5 @@
 //+------------------------------------------------------------------+
-//|                                    LimitedTest BreakoutEntry.mqh |
+//|                                         LimitedTest RSIEntry.mqh |
 //|                                                   RintaroYamaoka |
 //|              https://www.instagram.com/void0ntrick/?locale=ja_JP |
 //+------------------------------------------------------------------+
@@ -11,33 +11,40 @@
 #include "..\\Versions\\MyTradeModules20251109\\SignalModule.mqh"
 #include "..\\Versions\\MyTradeModules20251109\\PositionModule.mqh"
 //+------------------------------------------------------------------+
-// 限定的検証 エントリー差し替えテスト用モジュール（トレンドフォロー戦略）
+// 限定的検証 エントリー差し替えテスト用モジュール（カウンタートレンド戦略）
 //+------------------------------------------------------------------+
 
 // テスト専用パラメータ
+input int Test_RSI_MAperiod = 14;
+input int Test_RSI_BuyLevel = 30;
+input int Test_RSI_SellLevel = 70;
+input int Test_LotSize = 1;
 
-input int Test_Breakout_Bars = 5;
-input double Test_LotSize = 1.0;    
-
-class C_BreakoutBuy : public C_BuyBase
+class C_RSIBuy : public C_BuyBase
 {
 private:
     C_Order *order;
     C_Position *pos;
     C_BarData *bar;
     double lot;
-    bool pos_check;
     datetime last_time;
+    bool pos_check;
+    
+    C_Indicator *rsi;
+    int rsi_handle;
     
 public:
-    C_BreakoutBuy(C_Order *_order, C_Position *_position, C_BarData *_bar, bool position_check = true)
+    C_RSIBuy(C_Order *_order, C_Position *_position, C_BarData *_bar, 
+                  string _sym, ENUM_TIMEFRAMES _period, bool position_check = true) 
     {
         order = _order;
         pos = _position;
         bar = _bar;
-        lot = Test_LotSize;
-        pos_check = position_check; 
         last_time = 0;
+        pos_check = position_check;
+        
+        rsi_handle = iRSI(_sym, _period, Test_RSI_MAperiod, PRICE_CLOSE);
+        rsi = new C_Indicator(rsi_handle);
     }
     
     
@@ -54,43 +61,40 @@ public:
         int pos_count = pos.CopyStArray(p);
         if(pos_check && pos_count > 0) return;
          
-        double highest = -DBL_MAX;
-        for(int i=2; i<=Test_Breakout_Bars + 1; i++)
+        double rsi_val = rsi.GetValue(0, 1);
+        if(rsi_val <= Test_RSI_BuyLevel)
         {
-            double v = iHigh(sym, period, i);
-            if(v > highest) highest = v;
-        }
-
-        // 終値が最高値を超えたらブレイクアウト
-        double close = iClose(sym, period, 1);
-
-        if(close > highest)
-        {
-            order.Entry(true, lot, 0, 0);
-            Print("Buy Execute: 高値ブレイクアウト");
+            order.Entry(true, Test_LotSize, 0, 0);
+            Print("Buy Execute: RSI買いシグナル");
         }
     }
 };
 
-class C_BreakoutSell : public C_SellBase
+class C_RSISell : public C_SellBase
 {
 private:
     C_Order *order;
     C_Position *pos;
     C_BarData *bar;
     double lot;
-    bool pos_check;
     datetime last_time;
+    bool pos_check;
+    
+    C_Indicator *rsi;
+    int rsi_handle;
     
 public:
-    C_BreakoutSell(C_Order *_order, C_Position *_position, C_BarData *_bar, bool position_check = true)
+    C_RSISell(C_Order *_order, C_Position *_position, C_BarData *_bar, 
+                  string _sym, ENUM_TIMEFRAMES _period, bool position_check = true) 
     {
         order = _order;
         pos = _position;
         bar = _bar;
-        lot = Test_LotSize;
+        last_time = 0;
         pos_check = position_check;
-        last_time = 0; 
+        
+        rsi_handle = iRSI(_sym, _period, Test_RSI_MAperiod, PRICE_CLOSE);
+        rsi = new C_Indicator(rsi_handle);
     }
     
     
@@ -106,24 +110,13 @@ public:
         C_Position::POSITION p[];
         int pos_count = pos.CopyStArray(p);
         if(pos_check && pos_count > 0) return;
-        
-        double lowest = DBL_MAX;
+         
+        double rsi_val = rsi.GetValue(0, 1);
 
-        for(int i = 2; i <= Test_Breakout_Bars + 1; i++)
+        if(rsi_val >= Test_RSI_SellLevel)
         {
-            double v = iLow(sym, period, i);
-            if(v < lowest)
-                lowest = v;
-        }
-
-        // 終値が最低値を超えたらブレイクアウト
-        double close = iClose(sym, period, 1);
-        if(close < lowest)
-        {
-            order.Entry(false, lot, 0, 0);
-            Print("Sell Execute: 安値ブレイクアウト");
+            order.Entry(false, Test_LotSize, 0, 0);
+            Print("Sell Execute: RSI売りシグナル");
         }
     }
 };
-
-

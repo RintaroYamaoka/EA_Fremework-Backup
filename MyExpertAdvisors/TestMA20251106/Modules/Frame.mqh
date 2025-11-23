@@ -67,11 +67,6 @@ public:
     
     void OnTickMethod() override
     {
-        MqlRates current;
-        bar.GetStInfo(0, current);
-        if(current.time == last_time) return;
-        last_time = current.time;
-        
         exit.Process();
         C_Position::POSITION p[];
         if(position.CopyStArray(p) > 0) return;

@@ -1,42 +1,40 @@
 //+------------------------------------------------------------------+
-//|                                        LimitedTest FixedSLTP.mqh |
+//|                                   LimitedTest FixedSLTPClose.mqh |
 //|                                                   RintaroYamaoka |
 //|              https://www.instagram.com/void0ntrick/?locale=ja_JP |
 //+------------------------------------------------------------------+
 #property copyright "RintaroYamaoka"
 #property link      "https://www.instagram.com/void0ntrick/?locale=ja_JP"
 
-#include "..\\Versions\\MyTradeModules20251109\\EAFrame.mqh"
-#include "..\\Versions\\MyTradeModules20251109\\OrderModule.mqh"
-#include "..\\Versions\\MyTradeModules20251109\\PositionModule.mqh"
+#include "..\\..\\Versions\\MyTradeModules20251109\\EAFrame.mqh"
+#include "..\\..\\Versions\\MyTradeModules20251109\\OrderModule.mqh"
+#include "..\\..\\Versions\\MyTradeModules20251109\\PositionModule.mqh"
 //+------------------------------------------------------------------+
 // 限定的検証 固定SLTPでの手仕舞いテスト用モジュール
 //+------------------------------------------------------------------+
 
 // テスト専用パラメータ
-
 input int Test_FixedSLTP_Points = 300;
 
-class C_ExitFixedSLTP : public C_ExitBase
+class C_TestFixedSLTPClose : public C_ExitBase
 {
 private:
-    C_Order *order;
-    C_Position *pos;
+    C_Order *_order;
+    C_Position *_position;
 
 public:
-    C_ExitFixedSLTP(C_Order *_order, C_Position *_pos)
+    C_TestFixedSLTPClose(C_Order *order, C_Position *position)
+        : _order(order), _position(position)
     {
-        order = _order;
-        pos = _pos;
     }
     
     
-    bool Check() override
+    void Process() override
     {
         // ポジションが無ければ何もしない
         C_Position::POSITION p[];
-        int total = pos.CopyStArray(p);
-        if(total <= 0) return false;
+        int total = _position.CopyStArray(p);
+        if(total <= 0) return;
         
         for(int i = 0; i < total; i++)
         {
@@ -62,16 +60,8 @@ public:
                     tp = p[i].price - Test_FixedSLTP_Points * _Point;
                 }
                 
-                order.ModifySLTP(p[i].ticket, sl, tp);
+                _order.ModifySLTP(p[i].ticket, sl, tp);
             }                     
-        }
-        
-        return false;  
-    }
-    
-    void Execute() override
-    {
-        // 決済処理なし。サーバー側SL/TPヒットに任せる。
+        }  
     }
 };
-

@@ -20,21 +20,21 @@ public:
     void PrintSettings();
     
 private:
-    bool day[7];
+    bool _day[7];
 };
 
 // コンストラクタ トレード許可曜日を設定
 C_TradeSession::C_TradeSession(bool sun,bool mon,bool tue,bool wed,bool thu,bool fri,bool sat)                             
 {
-    ArrayInitialize(day,false);
+    ArrayInitialize(_day,false);
 
-    day[SUNDAY]    = sun;
-    day[MONDAY]    = mon;
-    day[TUESDAY]   = tue;
-    day[WEDNESDAY] = wed;
-    day[THURSDAY]  = thu;
-    day[FRIDAY]    = fri;
-    day[SATURDAY]  = sat;
+    _day[SUNDAY]    = sun;
+    _day[MONDAY]    = mon;
+    _day[TUESDAY]   = tue;
+    _day[WEDNESDAY] = wed;
+    _day[THURSDAY]  = thu;
+    _day[FRIDAY]    = fri;
+    _day[SATURDAY]  = sat;
     
     PrintSettings();    
 }
@@ -47,7 +47,7 @@ bool C_TradeSession::IsActiveDay()
     TimeToStruct(TimeCurrent(), now);
     
     // 現在日時と対応する曜日のbool値を返す
-    return day[now.day_of_week];
+    return _day[now.day_of_week];
 }
 
 // 現在がトレード許可時間帯か判定
@@ -89,7 +89,7 @@ void C_TradeSession::PrintSettings(void)
     
     for(int i = 0; i < 7; i++)
     {
-        flags += names[i] + "=" + (day[i] ? "true" : "false");
+        flags += names[i] + "=" + (_day[i] ? "true" : "false");
         if(i < 6) flags += ", ";
     }
         

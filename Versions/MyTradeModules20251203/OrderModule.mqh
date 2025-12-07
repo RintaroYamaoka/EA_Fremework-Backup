@@ -12,17 +12,17 @@
 class C_Order
 {
 public:
-    C_Order(ulong magic_no,int slipage,string symbol);
+    C_Order(ulong magic,int slippage,string symbol);
                             
     void Entry(bool in_long,double lot,double sl_points,double tp_points);
     void Close(ulong ticket);
     void ModifySLTP(ulong ticket, double sl, double tp); 
     
 private:
-    ulong magic;                          // マジックナンバー
-    int   slip;                           // 許容スリッページ
-    string sym;                           // シンボル
-    ENUM_ORDER_TYPE_FILLING fill_type;    // フィルポリシータイプ     
+    ulong _magic;                         // マジックナンバー
+    int   _slippage;                       // 許容スリッページ
+    string _symbol;                       // シンボル
+    ENUM_ORDER_TYPE_FILLING _fill_type;    // フィルポリシータイプ     
  
     ENUM_ORDER_TYPE_FILLING _GetFillType();
     void _Order(MqlTradeRequest &req, MqlTradeResult &res);        
@@ -30,14 +30,15 @@ private:
 
 //+------------------------------------------------------------------+
 // コンストラクタ フィルポリシーを取得 静的な値の保持
-C_Order::C_Order(ulong magic_no,int slipage,string symbol)
-{
-    magic = magic_no;
-    slip  = slipage;
-    sym   = symbol;
-   
+C_Order::C_Order(ulong magic_no,
+                 int slippage,
+                 string symbol)
+    :_magic(magic_no),
+     _slippage(slippage),
+     _symbol(symbol)
+{   
     string fill;
-    switch(fill_type = _GetFillType())
+    switch( _fill_type = _GetFillType())
     {
         case ORDER_FILLING_FOK:fill = "ORDER_FILLING_FOK"; break;    
         case ORDER_FILLING_IOC:fill = "ORDER_FILLING_IOC"; break;   
@@ -58,15 +59,15 @@ void C_Order::Entry(bool in_long,double lot,double sl_points,double tp_points)
     
     // リクエストのパラメータ
     request.action = TRADE_ACTION_DEAL;    // 取引操作タイプ
-    request.symbol = sym;                  // シンボル
+    request.symbol = _symbol;                  // シンボル
     request.volume = lot;                  // ボリューム
-    request.deviation = slip;              // 許容スリッページ
-    request.magic = magic;                 // 注文のMagicNumber
-    request.type_filling = fill_type;      // フィルポリシーのタイプ
+    request.deviation = _slippage;              // 許容スリッページ
+    request.magic = _magic;                 // 注文のMagicNumber
+    request.type_filling = _fill_type;      // フィルポリシーのタイプ
         
     // 現在価格を取得
-    double ask = SymbolInfoDouble(sym, SYMBOL_ASK);
-    double bid = SymbolInfoDouble(sym, SYMBOL_BID);
+    double ask = SymbolInfoDouble(_symbol, SYMBOL_ASK);
+    double bid = SymbolInfoDouble(_symbol, SYMBOL_BID);
     
     // 注文シグナルから売買方向を設定　
     if(in_long == true)
@@ -84,7 +85,7 @@ void C_Order::Entry(bool in_long,double lot,double sl_points,double tp_points)
     if(sl_points > 0 || tp_points > 0)
     {
         // ブローカーが定める最小SL,TP幅(points)を取得
-        int stop_level = (int)SymbolInfoInteger(sym, SYMBOL_TRADE_STOPS_LEVEL);
+        int stop_level = (int)SymbolInfoInteger(_symbol, SYMBOL_TRADE_STOPS_LEVEL);
         if(stop_level < 0)
         {
             PrintFormat("警告　%s stop_level < 0.", __FUNCTION__);
@@ -105,8 +106,8 @@ void C_Order::Entry(bool in_long,double lot,double sl_points,double tp_points)
             }    
         }
         
-        int digits = (int)SymbolInfoInteger(sym, SYMBOL_DIGITS);    // 小数点以下の桁数
-        double point = SymbolInfoDouble(sym, SYMBOL_POINT);       // 1pointあたりの価格差(価格単位)
+        int digits = (int)SymbolInfoInteger(_symbol, SYMBOL_DIGITS);    // 小数点以下の桁数
+        double point = SymbolInfoDouble(_symbol, SYMBOL_POINT);       // 1pointあたりの価格差(価格単位)
         
         if(in_long == true)
         {
@@ -134,7 +135,7 @@ void C_Order::Close(ulong ticket)
         ResetLastError();
         return;
     }                                           
-    if(sym != PositionGetString(POSITION_SYMBOL) || magic != PositionGetInteger(POSITION_MAGIC))   
+    if(_symbol != PositionGetString(POSITION_SYMBOL) || _magic != PositionGetInteger(POSITION_MAGIC))   
     {    
         PrintFormat("警告 %s 不明なポジション ticket=%d", __FUNCTION__, ticket);
         return;
@@ -147,24 +148,24 @@ void C_Order::Close(ulong ticket)
     // 操作パラメータの設定   
     request.action = TRADE_ACTION_DEAL;                     // 取引操作タイプ
     request.position = ticket;                              // ポジションチケット
-    request.symbol = sym;                                   // シンボル
+    request.symbol = _symbol;                               // シンボル
     request.volume = PositionGetDouble(POSITION_VOLUME);    // ポジションボリューム
-    request.deviation = slip;                               // 許容スリッページ
-    request.magic = magic;                                  // ポジションのMagicNumber
-    request.type_filling = fill_type;                       // フィルポリシー
+    request.deviation = _slippage;                          // 許容スリッページ
+    request.magic = _magic;                                 // ポジションのMagicNumber
+    request.type_filling = _fill_type;                      // フィルポリシー
        
     ENUM_POSITION_TYPE type = (ENUM_POSITION_TYPE)PositionGetInteger(POSITION_TYPE);    // ポジションタイプ
  
     // 注文シグナル、ポジションタイプ判定　注文タイプと価格の設定
     if(type == POSITION_TYPE_BUY)
     {
-        request.price = SymbolInfoDouble(sym, SYMBOL_BID);
-        request.type  = ORDER_TYPE_SELL;
+        request.price = SymbolInfoDouble(_symbol, SYMBOL_BID);
+        request.type = ORDER_TYPE_SELL;
     }
     else if(type == POSITION_TYPE_SELL)
     {
-        request.price = SymbolInfoDouble(sym, SYMBOL_ASK);
-        request.type  = ORDER_TYPE_BUY;
+        request.price = SymbolInfoDouble(_symbol, SYMBOL_ASK);
+        request.type = ORDER_TYPE_BUY;
     }
      
     _Order(request,result);
@@ -182,14 +183,14 @@ void C_Order::ModifySLTP(ulong ticket, double sl_price, double tp_price)
         return;
     }
     
-    if(sym != PositionGetString(POSITION_SYMBOL) || magic != PositionGetInteger(POSITION_MAGIC))   
+    if(_symbol != PositionGetString(POSITION_SYMBOL) || _magic != PositionGetInteger(POSITION_MAGIC))   
     {    
         PrintFormat("警告 %s 不明なポジション ticket=%d", __FUNCTION__, ticket);
         return;
     }
     
     // ブローカーが定める最小SL,TP幅(points)を取得
-    int stop_level = (int)SymbolInfoInteger(sym, SYMBOL_TRADE_STOPS_LEVEL);
+    int stop_level = (int)SymbolInfoInteger(_symbol, SYMBOL_TRADE_STOPS_LEVEL);
     if(stop_level < 0)
     {
         PrintFormat("警告　%s stop_level < 0.", __FUNCTION__);
@@ -197,10 +198,10 @@ void C_Order::ModifySLTP(ulong ticket, double sl_price, double tp_price)
     }
     
     // 現在価格・ティック情報取得
-    double bid    = SymbolInfoDouble(sym, SYMBOL_BID);
-    double ask    = SymbolInfoDouble(sym, SYMBOL_ASK);
-    double point  = SymbolInfoDouble(sym, SYMBOL_POINT);
-    int    digits = (int)SymbolInfoInteger(sym, SYMBOL_DIGITS);
+    double bid = SymbolInfoDouble(_symbol, SYMBOL_BID);
+    double ask = SymbolInfoDouble(_symbol, SYMBOL_ASK);
+    double point = SymbolInfoDouble(_symbol, SYMBOL_POINT);
+    int digits = (int)SymbolInfoInteger(_symbol, SYMBOL_DIGITS);
     
     ENUM_POSITION_TYPE type = (ENUM_POSITION_TYPE)PositionGetInteger(POSITION_TYPE);
 
@@ -232,14 +233,14 @@ void C_Order::ModifySLTP(ulong ticket, double sl_price, double tp_price)
 
     request.action = TRADE_ACTION_SLTP;    // SL/TP変更
     request.position = ticket;             // ポジションチケット
-    request.symbol = sym;                  // シンボル
-    request.magic = magic;                 // MagicNumber
+    request.symbol = _symbol;              // シンボル
+    request.magic = _magic;                // MagicNumber
     request.sl = sl_price;                 // 新SL（0なら変更しない）
     request.tp = tp_price;                 // 新TP（0なら変更しない）    
     
     // TRADE_ACTION_SLTPでは無視されるが、統一のため
-    request.deviation   = slip;
-    request.type_filling = fill_type;
+    request.deviation   = _slippage;
+    request.type_filling = _fill_type;
 
     _Order(request, result);    
 }
@@ -248,7 +249,7 @@ void C_Order::ModifySLTP(ulong ticket, double sl_price, double tp_price)
 // フィルポリシーを取得
 ENUM_ORDER_TYPE_FILLING C_Order::_GetFillType()
 {
-    long fill = SymbolInfoInteger(sym, SYMBOL_FILLING_MODE);
+    long fill = SymbolInfoInteger(_symbol, SYMBOL_FILLING_MODE);
 
     // ビット判定
     if((fill & ORDER_FILLING_IOC) != 0) return ORDER_FILLING_IOC;

@@ -23,70 +23,69 @@ public:
         double profit;
     }; 
     
-    C_Position(ulong magic,string symbol);
+    C_Position(ulong magic, string symbol);
     int CopyStArray(POSITION &st[]);
 
 private:
-    ulong magic;
-    string sym;
-    POSITION pos[]; 
+    ulong _magic;
+    string _symbol;
+    POSITION _pos[]; 
     
-    int UpdatePosData();   
+    int _UpdatePosData();   
 };
 
 // コンストラクタ
-C_Position::C_Position(ulong magic_no,string symbol)
+C_Position::C_Position(ulong magic, string symbol)
+    :_magic(magic), _symbol(symbol)
 {
-    magic = magic_no;
-    sym   = symbol;
-    ArrayResize(pos,0);
+    ArrayResize(_pos,0);
 }
 
 // ポジション情報を構造体配列にコピーし、ポジション数を戻り値に返す
 int C_Position::CopyStArray(POSITION &st[])
 {
-    int positions = UpdatePosData();
+    int positions = _UpdatePosData();
     if(positions <= 0) return positions;
         
     ArrayResize(st,positions);
     
     for(int i = 0; i < positions; i++)
     {
-        st[i].ticket  = pos[i].ticket;    
-        st[i].is_long = pos[i].is_long;
-        st[i].lot     = pos[i].lot;
-        st[i].price   = pos[i].price;
-        st[i].sl      = pos[i].sl;
-        st[i].tp      = pos[i].tp;
-        st[i].profit  = pos[i].profit;
+        st[i].ticket  = _pos[i].ticket;    
+        st[i].is_long = _pos[i].is_long;
+        st[i].lot     = _pos[i].lot;
+        st[i].price   = _pos[i].price;
+        st[i].sl      = _pos[i].sl;
+        st[i].tp      = _pos[i].tp;
+        st[i].profit  = _pos[i].profit;
     }
     return positions;   
 }
 
 // ポジション情報を取得、構造体配列に格納し、EAのポジション数を戻り値に返す
-int C_Position::UpdatePosData()
+int C_Position::_UpdatePosData()
 {
     int count = 0;
     int positions = PositionsTotal();
     if(positions <= 0) return positions;
     
-    ArrayResize(pos,positions);
+    ArrayResize(_pos,positions);
     
     for(int i = 0; i < positions; i++)
     {
         ulong selected_ticket = PositionGetTicket(i);
         if( PositionSelectByTicket(selected_ticket))
         {
-            if(PositionGetString(POSITION_SYMBOL) != sym) continue;
-            if(PositionGetInteger(POSITION_MAGIC) != magic) continue;
+            if(PositionGetString(POSITION_SYMBOL) != _symbol) continue;
+            if(PositionGetInteger(POSITION_MAGIC) != _magic) continue;
             
-            pos[count].ticket  = selected_ticket;    
-            pos[count].is_long = ( PositionGetInteger(POSITION_TYPE) == POSITION_TYPE_BUY);
-            pos[count].lot     = PositionGetDouble(POSITION_VOLUME);
-            pos[count].price   = PositionGetDouble(POSITION_PRICE_OPEN);
-            pos[count].sl      = PositionGetDouble(POSITION_SL);
-            pos[count].tp      = PositionGetDouble(POSITION_TP);
-            pos[count].profit  = PositionGetDouble(POSITION_PROFIT);
+            _pos[count].ticket  = selected_ticket;    
+            _pos[count].is_long = ( PositionGetInteger(POSITION_TYPE) == POSITION_TYPE_BUY);
+            _pos[count].lot     = PositionGetDouble(POSITION_VOLUME);
+            _pos[count].price   = PositionGetDouble(POSITION_PRICE_OPEN);
+            _pos[count].sl      = PositionGetDouble(POSITION_SL);
+            _pos[count].tp      = PositionGetDouble(POSITION_TP);
+            _pos[count].profit  = PositionGetDouble(POSITION_PROFIT);
             count += 1;  
         }
         else 
@@ -96,6 +95,6 @@ int C_Position::UpdatePosData()
         }    
     }
     
-    ArrayResize(pos,count);
+    ArrayResize(_pos,count);
     return count;
 }

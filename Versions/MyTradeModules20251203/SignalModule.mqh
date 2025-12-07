@@ -18,22 +18,22 @@ public:
     double GetValue(int buffer_index,int bar_index);
 
 private:
-    int handle;    // インジケータのハンドル
+    int _handle;    // インジケータのハンドル
 };
 
 // コンストラクタ 引数にインジケータ関数を入れる
 C_Indicator::C_Indicator(int i_handle)
 {
-    handle = i_handle;
-    if(handle == INVALID_HANDLE)
+    _handle = i_handle;
+    if(_handle == INVALID_HANDLE)
         Print("警告 ",__FUNCTION__," インジケータのハンドル取得に失敗");    
 }
 
 // デストラクタ
 C_Indicator::~C_Indicator()
 {
-    if(handle != INVALID_HANDLE)
-        IndicatorRelease(handle); 
+    if(_handle != INVALID_HANDLE)
+        IndicatorRelease(_handle); 
 }
 
 // メイン関数 引数:インジケーター関数指定のバッファインデックス,取得するバーのインデックス
@@ -43,7 +43,7 @@ double C_Indicator::GetValue(int buffer_index, int bar_index)
     
     // データを最新を0として時系列にセットする
     ArraySetAsSeries(value, true);
-    if( CopyBuffer(handle, buffer_index, 0, bar_index + 1, value) <= bar_index)
+    if( CopyBuffer(_handle, buffer_index, 0, bar_index + 1, value) <= bar_index)
     {
         Print("警告 ",__FUNCTION__," データ取得失敗");
         return -1;
@@ -67,16 +67,17 @@ private:
     int      buffer;
     MqlRates st_bar_data[];    // 時刻、4本値、Tick出来高、スプレッド、実出来高
     
-    bool UpdateMqlRates();     
+    bool UpdateMqlRates();    
 };
 
 // コンストラクタ
-C_BarData::C_BarData(string symbol,ENUM_TIMEFRAMES period,int bar_buffer = 100)
-{
-    sym    = symbol;
-    time   = period;
-    buffer = bar_buffer;
-    
+C_BarData::C_BarData(string symbol,
+                     ENUM_TIMEFRAMES period,
+                     int bar_buffer = 100)
+    :sym(symbol),
+     time(period),
+     buffer(bar_buffer)
+{    
     if(buffer <= 0)
         Print("警告 ",__FUNCTION__,"　バーデータ構造体配列数が0以下");
     else
